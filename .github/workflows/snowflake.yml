@@ -6,14 +6,15 @@ on:
     branches:
       - main
     paths:
-      - 'dbscripts/**'
+      - 'dbscripts/**' #everytime we add file to "dbscripts" folder, this workflow will be executed
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  deploy-snowflake-changes-job:
-    runs-on: ubuntu-latest
+  deploy-snowflake-changes-job: #just job name
+    runs-on: ubuntu-latest #the options are "self-hosted" or "ubuntu-latest"
+    # self-hosted -> https://github.com/auzty/snowflake-simple-2/settings/actions/runners/new?arch=x64&os=linux
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -21,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Use Python 3.8.x
-        uses: actions/setup-python@v2.2.1
+        uses: actions/setup-python@v2.2.1 #https://github.com/actions/setup-python
         with:
           python-version: 3.8.x
 
@@ -34,10 +35,11 @@ jobs:
           SF_DATABASE: ${{ secrets.SF_DATABASE }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
         run: |
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"  #https://docs.github.com/en/actions/learn-github-actions/variables
           python --version
           echo "Step 1: Installing schemachange"
-          pip install schemachange
+          pip install schemachange  # schemachange uses python, the snowsql using linux binaries
           
           echo "Step 2: Running schemachange"
           schemachange -f $GITHUB_WORKSPACE/dbscripts -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+          #schemachange will only run all the files once on specific directories, after that only detect the version name changes and run it immediately
